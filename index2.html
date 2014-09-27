@@ -76,7 +76,9 @@
             near, far);
 
     	// CREATE OFFSET MODELVIEW MATRIX
-    	var dis = -93.3;
+    	// var dis = -93.3;
+    	// instead...
+    	var dis = -headZ;
 
 		var mv = new THREE.Matrix4(); // identity matrix
 	    mv.lookAt( headX * dis, headY * dis, 0, headX * dis, headY * dis, -1, 0, 1, 0);
@@ -102,16 +104,16 @@
 		screenHeight_cms: 30,
 		x: 0,
 		y: 0,
-		z: 55,
+		z: 93,
 		lookX: 0,
 		lookY: 0,
 		lookZ: 0
 	};
 
 	var f1 = gui.addFolder('Perspective');
-	f1.add(perspectiveParams, 'x', -0.5, 0.5).step(.05).onChange(onParamsChange);
-	f1.add(perspectiveParams, 'y', -0.5, 0.5).step(.05).onChange(onParamsChange);
-	f1.add(perspectiveParams, 'z', 0, 70).step(1).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'x', -0.5, 0.5).step(.01).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'y', -0.5, 0.5).step(.01).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'z', 0, 500).step(1).onChange(onParamsChange);
 	f1.add(perspectiveParams, 'lookX', -200, 200).step(1).onChange(onParamsChange);
 	f1.add(perspectiveParams, 'lookY', -200, 200).step(1).onChange(onParamsChange);
 	f1.add(perspectiveParams, 'lookZ', -200, 200).step(1).onChange(onParamsChange);
