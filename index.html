@@ -27,6 +27,8 @@
 	camera.lookAt(new THREE.Vector3(0,0,0));
 	scene.add( camera );
 
+	// camera.matrixAutoUpdate = false; // TODO: not sure how to use this.
+
 	//////////////////////////////////////////////////////////////////////////////////
 	//		add an object in the scene
 	//////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +37,7 @@
 	var material = new THREE.MeshNormalMaterial(); 
 	var mesh = new THREE.Mesh( geometry, material );
 	mesh.position.y = 25;
-	mesh.position.z = -25;
+	mesh.position.z = -100;
 	scene.add( mesh );
 
 	var axes = new THREE.AxisHelper(100);
@@ -83,6 +85,7 @@
 		camera.fov = Math.atan((wh/2 + Math.abs(y * scaling ))/(Math.abs(z*scaling)))*360/Math.PI;
 		//debugger;
 		
+		// camera.updateMatrixWorld(); // not sure about this.
 		camera.updateProjectionMatrix();
 	}
 
@@ -118,9 +121,10 @@
 
 	// handle window resize
 	window.addEventListener('resize', function(){
-		renderer.setSize( window.innerWidth, window.innerHeight )
-		camera.aspect	= window.innerWidth / window.innerHeight
-		camera.updateProjectionMatrix()		
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		camera.aspect	= window.innerWidth / window.innerHeight;
+		// camera.updateProjectionMatrix();
+		onParamsChange();
 	}, false)
 	
 	// run the rendering loop
