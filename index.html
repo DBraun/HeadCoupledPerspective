@@ -31,12 +31,15 @@
 	//		add an object in the scene
 	//////////////////////////////////////////////////////////////////////////////////
 
-	// add a torus	
 	var geometry = new THREE.BoxGeometry( 50, 50, 50, 1, 1, 1 );
 	var material = new THREE.MeshNormalMaterial(); 
 	var mesh = new THREE.Mesh( geometry, material );
 	mesh.position.y = 25;
-	this.scene.add( mesh );
+	mesh.position.z = -25;
+	scene.add( mesh );
+
+	var axes = new THREE.AxisHelper(100);
+    scene.add( axes );
 
 	// note: 4x4 checkboard pattern scaled so that each square is 25 by 25 pixels.
 	var floorTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
@@ -75,7 +78,7 @@
 		
 		// update lookAt?
 		// camera.lookAt(newLookat);
-		
+
 		// when changing height of window, we need to change field of view
 		camera.fov = Math.atan((wh/2 + Math.abs(y * scaling ))/(Math.abs(z*scaling)))*360/Math.PI;
 		//debugger;
