@@ -36,10 +36,25 @@
 
 	var geometry = new THREE.BoxGeometry( 50, 50, 50, 1, 1, 1 );
 	var material = new THREE.MeshNormalMaterial(); 
-	var mesh = new THREE.Mesh( geometry, material );
-	mesh.position.y = 25;
-	mesh.position.z = -100;
-	scene.add( mesh );
+
+	var box1 = new THREE.Mesh( geometry, material );
+	box1.position.x = 0;
+	box1.position.y = 25;
+	box1.position.z = -100;
+
+	var box2 = new THREE.Mesh( geometry, material );
+	box2.position.x = 200;
+	box2.position.y = 25;
+	box2.position.z = 100;
+
+	var box3 = new THREE.Mesh( geometry, material );
+	box3.position.x = -200;
+	box3.position.y = 25;
+	box3.position.z = 0;
+
+	scene.add( box1 );
+	scene.add( box2 );
+	scene.add( box3 );
 
 	// add a window frame
 	var windowFrameGeometry = new THREE.PlaneGeometry(200, 200, 1, 1);
