@@ -23,9 +23,8 @@
 	// init scene and camera
 	var scene = new THREE.Scene();
 	var camera = new THREE.PerspectiveCamera( 23, window.innerWidth / window.innerHeight, 1, 100000 );
-	camera.position.x = 0;
-	camera.position.y = 0;
-	camera.position.z = 0;
+	var fixedPosition = new THREE.Vector3(0, 0, 0);
+	camera.position = fixedPosition;
 	camera.lookAt(new THREE.Vector3(0,0,0));
 	scene.add( camera );
 
@@ -76,16 +75,13 @@
 		var wh = screenHeight_cms * scaling;
 		var ww = wh * camera.aspect;
 
-		// TODO: does this depend on the camera starting at (0,0,0)?
-		var fixedPosition = [0, 0, 0];
-
 		var xOffset = x > 0 ? 0 : -x * 2 * scaling;
 		var yOffset = y < 0 ? 0 : y * 2 * scaling;
 		camera.setViewOffset(ww + Math.abs(x * 2 * scaling), wh + Math.abs(y * 2 * scaling), xOffset, yOffset, ww, wh);
 		
-		camera.position.x = fixedPosition[0] + (x * scaling );
-		camera.position.y = fixedPosition[1] + (y * scaling );
-		camera.position.z = fixedPosition[2] + (z * scaling );
+		camera.position.x = fixedPosition.x + (x * scaling );
+		camera.position.y = fixedPosition.y + (y * scaling );
+		camera.position.z = fixedPosition.z + (z * scaling );
 		
 		// update lookAt?
 		// camera.lookAt(newLookat);
