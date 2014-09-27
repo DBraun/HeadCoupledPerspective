@@ -16,8 +16,11 @@
 	var renderer	= new THREE.WebGLRenderer({
 		antialias	: true
 	});
+	var SCREEN_WIDTH = window.innerWidth;
+	var SCREEN_HEIGHT = window.innerHeight;
+
 	renderer.setClearColor(new THREE.Color('lightgrey'), 1)
-	renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 	document.body.appendChild( renderer.domElement );
 
 	// init scene and camera
@@ -27,6 +30,8 @@
 	camera.position = fixedPosition;
 	camera.lookAt(new THREE.Vector3(0,0,0));
 	scene.add( camera );
+
+	var scaling = 2560 / 64.62; // my 2560x1600 monitor is 64.62cm × 40.39cm
 
 	// camera.matrixAutoUpdate = false; // TODO: not sure how to use this.
 
@@ -52,9 +57,15 @@
 	box3.position.y = 25;
 	box3.position.z = 0;
 
+	var box4 = new THREE.Mesh( geometry, material );
+	box4.position.x = -300;
+	box4.position.y = 25;
+	box4.position.z = -500;
+
 	scene.add( box1 );
 	scene.add( box2 );
 	scene.add( box3 );
+	scene.add( box4 );
 
 	// add a window frame
 	var windowFrameGeometry = new THREE.PlaneGeometry(200, 200, 1, 1);
@@ -66,43 +77,71 @@
     scene.add( axes );
 
 	// note: 4x4 checkboard pattern scaled so that each square is 25 by 25 pixels.
+	var ROOM_DEPTH = 1000;
 	var floorTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
 	floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
 	floorTexture.repeat.set( 10, 10 );
 	// DoubleSide: render texture on both sides of mesh
 	var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
-	var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 1, 1);
+	
+	var floorGeometry = new THREE.PlaneGeometry(SCREEN_WIDTH, ROOM_DEPTH, 1, 1);
+	var wallGeometry = new THREE.PlaneGeometry(SCREEN_HEIGHT, ROOM_DEPTH, 1, 1);
+	var backWallGeometry = new THREE.PlaneGeometry(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 1);
+
 	var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-	floor.position.y = -0.5;
-	floor.position.z = -500;
+	floor.position.y = -SCREEN_HEIGHT/2;
+	floor.position.z = -ROOM_DEPTH/2;
 	floor.rotation.x = Math.PI / 2;
 	scene.add(floor);
+
+	var leftWall = new THREE.Mesh(wallGeometry, floorMaterial);
+	leftWall.position.x = -SCREEN_WIDTH/2;
+	leftWall.position.z = -ROOM_DEPTH/2;
+	leftWall.rotation.z = Math.PI / 2;
+	leftWall.rotation.y = Math.PI / 2;
+	scene.add(leftWall);
+
+	var rightWall = new THREE.Mesh(wallGeometry, floorMaterial);
+	rightWall.position.x = SCREEN_WIDTH/2;
+	rightWall.position.z = -ROOM_DEPTH/2;
+	rightWall.rotation.z = -Math.PI / 2;
+	rightWall.rotation.y = Math.PI / 2;
+	scene.add(rightWall);
+
+	var ceiling = new THREE.Mesh(floorGeometry, floorMaterial);
+	ceiling.position.y = SCREEN_HEIGHT / 2;
+	ceiling.position.z = -ROOM_DEPTH/2;
+	ceiling.rotation.x = -Math.PI/2;
+	scene.add(ceiling);
+
+	var backWall = new THREE.Mesh(backWallGeometry, floorMaterial);
+	backWall.position.z = -ROOM_DEPTH/2;
+	scene.add(backWall);
 
 	function onParamsChange() {
 		var x = perspectiveParams.x;
 		var y = perspectiveParams.y;
 		var z = perspectiveParams.z;
-		var scaling = perspectiveParams.scaling;
+		var fixedX = perspectiveParams.fixedX;
+		var fixedY = perspectiveParams.fixedY;
+		var fixedZ = perspectiveParams.fixedZ;
 		var screenHeight_cms = perspectiveParams.screenHeight_cms;
 
 		var newLookat = new THREE.Vector3(perspectiveParams.lookX, perspectiveParams.lookY, perspectiveParams.lookZ);
 
-		var wh = screenHeight_cms * scaling;
-		var ww = wh * camera.aspect;
-
 		var xOffset = x > 0 ? 0 : -x * 2 * scaling;
 		var yOffset = y < 0 ? 0 : y * 2 * scaling;
-		camera.setViewOffset(ww + Math.abs(x * 2 * scaling), wh + Math.abs(y * 2 * scaling), xOffset, yOffset, ww, wh);
+		camera.setViewOffset(SCREEN_WIDTH + Math.abs(x * 2 * scaling), SCREEN_HEIGHT + Math.abs(y * 2 * scaling), xOffset, yOffset, SCREEN_WIDTH, SCREEN_HEIGHT);
 		
-		camera.position.x = fixedPosition.x + (x * scaling );
-		camera.position.y = fixedPosition.y + (y * scaling );
-		camera.position.z = fixedPosition.z + (z * scaling );
+		camera.position.x = fixedX + (x * scaling );
+		camera.position.y = fixedY + (y * scaling );
+		camera.position.z = fixedZ + (z * scaling );
 		
 		// update lookAt?
 		// camera.lookAt(newLookat);
 
 		// when changing height of window, we need to change field of view
-		camera.fov = Math.atan((wh/2 + Math.abs(y * scaling ))/(Math.abs(z*scaling)))*360/Math.PI;
+		camera.fov = Math.atan((SCREEN_HEIGHT/2 + Math.abs(y * scaling ))/(Math.abs(z*scaling)))*360/Math.PI;
 		//debugger;
 		
 		// camera.updateMatrixWorld(); // not sure about this.
@@ -111,25 +150,27 @@
 
 	var gui = new dat.GUI();
 	var perspectiveParams = {
-		scaling: 15.0,
-		screenHeight_cms: 30,
 		x: 0,
 		y: 5,
 		z: 55,
+		fixedX: 0,
+		fixedY: 0,
+		fixedZ: 0,
 		lookX: 0,
 		lookY: 0,
 		lookZ: 0
 	};
 
 	var f1 = gui.addFolder('Perspective');
-	f1.add(perspectiveParams, 'x', -30, 30).step(1).onChange(onParamsChange);
-	f1.add(perspectiveParams, 'y', -30, 30).step(1).onChange(onParamsChange);
-	f1.add(perspectiveParams, 'z', 0, 70).step(1).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'x', -100, 100).step(1).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'y', -100, 100).step(1).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'z', 0, 100).step(1).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'fixedX', 0, 200).step(1).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'fixedY', 0, 200).step(1).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'fixedZ', 0, 200).step(1).onChange(onParamsChange);
 	f1.add(perspectiveParams, 'lookX', -200, 200).step(1).onChange(onParamsChange);
 	f1.add(perspectiveParams, 'lookY', -200, 200).step(1).onChange(onParamsChange);
 	f1.add(perspectiveParams, 'lookZ', -200, 200).step(1).onChange(onParamsChange);
-	f1.add(perspectiveParams, 'scaling', 1, 30).step(1).onChange(onParamsChange);
-	f1.add(perspectiveParams, 'screenHeight_cms', 10, 40).step(1).onChange(onParamsChange);
 
 	f1.open();
 
