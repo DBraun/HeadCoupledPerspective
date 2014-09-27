@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<script src='vendor/three.js'></script>
+<script src='vendor/dat.gui.min.js'></script>
+<div style='position: absolute; top: 0px; width: 100%;font-family:arial; font-weight: bolder; padding-top: 5px;'>
+	<a href="https://github.com/jeromeetienne/threejsboilerplate" target="_blank">Boilerplate</a>
+	for
+	<a href="http://threejs.org" target="_blank">three.js</a>
+	- works on desktop and mobile
+</div><body style='margin: 0px; overflow: hidden; text-align:center;'><script>
+	//////////////////////////////////////////////////////////////////////////////////
+	//		Init
+	//////////////////////////////////////////////////////////////////////////////////
+
+	// init renderer
+	var renderer	= new THREE.WebGLRenderer({
+		antialias	: true
+	});
+	renderer.setClearColor(new THREE.Color('lightgrey'), 1)
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	document.body.appendChild( renderer.domElement );
+
+	// init scene and camera
+	var scene = new THREE.Scene();
+	var camera = new THREE.PerspectiveCamera( 23, window.innerWidth / window.innerHeight, 1, 100000 );
+	camera.position.z = 0;
+	scene.add( camera );
+
+	//////////////////////////////////////////////////////////////////////////////////
+	//		add an object in the scene
+	//////////////////////////////////////////////////////////////////////////////////
+
+	// add a torus	
+	var geometry = new THREE.BoxGeometry( 50, 50, 50, 1, 1, 1 );
+	var material	= new THREE.MeshNormalMaterial(); 
+	var mesh	= new THREE.Mesh( geometry, material );
+	mesh.position.y = 25;
+	this.scene.add( mesh );
+
+	// note: 4x4 checkboard pattern scaled so that each square is 25 by 25 pixels.
+	var floorTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
+	floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+	floorTexture.repeat.set( 10, 10 );
+	// DoubleSide: render texture on both sides of mesh
+	var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
+	var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 1, 1);
+	var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+	floor.position.y = -0.5;
+	floor.rotation.x = Math.PI / 2;
+	scene.add(floor);
+
+	function onParamsChange() {
+		//copy gui params into shader uniforms
+		var x = perspectiveParams.x;
+		var y = perspectiveParams.y;
+		var z = perspectiveParams.z;
+		var scaling = perspectiveParams.scaling;
+		var screenHeight_cms = perspectiveParams.screenHeight_cms;
+
+		var newLookat = new THREE.Vector3(perspectiveParams.lookX, perspectiveParams.lookY, perspectiveParams.lookZ);
+
+		var wh = screenHeight_cms * scaling;
+		var ww = wh * camera.aspect;
+
+		var fixedPosition = [0, 0, 0];
+
+		var xOffset = x > 0 ? 0 : -x * 2 * scaling;
+		var yOffset = y < 0 ? 0 : y * 2 * scaling;
+		camera.setViewOffset(ww + Math.abs(x * 2 * scaling), wh + Math.abs(y * 2 * scaling), xOffset, yOffset, ww, wh);
+		
+		camera.position.x = fixedPosition[0] + (x * scaling );
+		camera.position.y = fixedPosition[1] + (y * scaling );
+		camera.position.z = fixedPosition[2] + (z * scaling );
+		
+		// update lookAt?
+		// camera.lookAt(newLookat);
+		
+		// when changing height of window, we need to change field of view
+		camera.fov = Math.atan((wh/2 + Math.abs(y * scaling ))/(Math.abs(z*scaling)))*360/Math.PI;
+		//debugger;
+		
+		camera.updateProjectionMatrix();
+	}
+
+	var gui = new dat.GUI();
+	var perspectiveParams = {
+		scaling: 15.0,
+		screenHeight_cms: 30,
+		x: 0,
+		y: 5,
+		z: 55,
+		lookX: 0,
+		lookY: 0,
+		lookZ: 0
+	};
+
+	var f1 = gui.addFolder('Perspective');
+	f1.add(perspectiveParams, 'x', -30, 30).step(1).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'y', -30, 30).step(1).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'z', 0, 70).step(1).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'lookX', -200, 200).step(1).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'lookY', -200, 200).step(1).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'lookZ', -200, 200).step(1).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'scaling', 1, 30).step(1).onChange(onParamsChange);
+	f1.add(perspectiveParams, 'screenHeight_cms', 10, 40).step(1).onChange(onParamsChange);
+
+	f1.open();
+
+	onParamsChange();
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	//		render the whole thing on the page
+	//////////////////////////////////////////////////////////////////////////////////
+
+	// handle window resize
+	window.addEventListener('resize', function(){
+		renderer.setSize( window.innerWidth, window.innerHeight )
+		camera.aspect	= window.innerWidth / window.innerHeight
+		camera.updateProjectionMatrix()		
+	}, false)
+	
+	// run the rendering loop
+	requestAnimationFrame(function animate(nowMsec){
+		// keep looping
+		requestAnimationFrame( animate );
+		renderer.render( scene, camera );	
+	})
+</script></body>
