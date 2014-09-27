@@ -32,8 +32,8 @@
 
 	// add a torus	
 	var geometry = new THREE.BoxGeometry( 50, 50, 50, 1, 1, 1 );
-	var material	= new THREE.MeshNormalMaterial(); 
-	var mesh	= new THREE.Mesh( geometry, material );
+	var material = new THREE.MeshNormalMaterial(); 
+	var mesh = new THREE.Mesh( geometry, material );
 	mesh.position.y = 25;
 	this.scene.add( mesh );
 
@@ -50,7 +50,6 @@
 	scene.add(floor);
 
 	function onParamsChange() {
-		//copy gui params into shader uniforms
 		var x = perspectiveParams.x;
 		var y = perspectiveParams.y;
 		var z = perspectiveParams.z;
@@ -62,6 +61,7 @@
 		var wh = screenHeight_cms * scaling;
 		var ww = wh * camera.aspect;
 
+		// TODO: does this depend on the camera starting at (0,0,0)?
 		var fixedPosition = [0, 0, 0];
 
 		var xOffset = x > 0 ? 0 : -x * 2 * scaling;
