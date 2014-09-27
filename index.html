@@ -42,6 +42,12 @@
 	mesh.position.z = -100;
 	scene.add( mesh );
 
+	// add a window frame
+	var windowFrameGeometry = new THREE.PlaneGeometry(200, 200, 1, 1);
+	var windowMaterial = new THREE.MeshBasicMaterial({wireframe: true, color: new THREE.Color('black')});
+	var windowMesh = new THREE.Mesh(windowFrameGeometry, windowMaterial);
+	scene.add(windowMesh);
+
 	var axes = new THREE.AxisHelper(100);
     scene.add( axes );
 
