@@ -54,6 +54,7 @@
 	var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 1, 1);
 	var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 	floor.position.y = -0.5;
+	floor.position.z = -500;
 	floor.rotation.x = Math.PI / 2;
 	scene.add(floor);
 
@@ -94,8 +95,11 @@
 		// instead...
 		persp.multiply(mv);
 		camera.projectionMatrix.copy(persp);
+
 		// mvp.setUniform( gl, uloc, false);
 		// mesh.render( gl);
+
+		// scene.updateMatrixWorld(); // not sure about this
 	}
 
 	var gui = new dat.GUI();
