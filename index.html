@@ -28,12 +28,9 @@
 	var camera = new THREE.PerspectiveCamera( 23, window.innerWidth / window.innerHeight, 1, 100000 );
 	var fixedPosition = new THREE.Vector3(0, 0, 0);
 	camera.position = fixedPosition;
-	camera.lookAt(new THREE.Vector3(0,0,0));
 	scene.add( camera );
 
 	var scaling = 2560 / 64.62; // my 2560x1600 monitor is 64.62cm × 40.39cm
-
-	// camera.matrixAutoUpdate = false; // TODO: not sure how to use this.
 
 	//////////////////////////////////////////////////////////////////////////////////
 	//		add an object in the scene
@@ -73,12 +70,12 @@
 	var windowMesh = new THREE.Mesh(windowFrameGeometry, windowMaterial);
 	scene.add(windowMesh);
 
-	var axes = new THREE.AxisHelper(100);
-    scene.add( axes );
+	const axesHelper = new THREE.AxesHelper( 100 );
+    scene.add( axesHelper );
 
 	// note: 4x4 checkboard pattern scaled so that each square is 25 by 25 pixels.
 	var ROOM_DEPTH = SCREEN_WIDTH;
-	var floorTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
+	const floorTexture = new THREE.TextureLoader().load( 'images/checkerboard.jpg' );
 	floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
 	floorTexture.repeat.set( 10, 10 );
 	// DoubleSide: render texture on both sides of mesh
@@ -127,8 +124,6 @@
 		var fixedZ = perspectiveParams.fixedZ;
 		var screenHeight_cms = perspectiveParams.screenHeight_cms;
 
-		var newLookat = new THREE.Vector3(perspectiveParams.lookX, perspectiveParams.lookY, perspectiveParams.lookZ);
-
 		var xOffset = x > 0 ? 0 : -x * 2 * scaling;
 		var yOffset = y < 0 ? 0 : y * 2 * scaling;
 		camera.setViewOffset(SCREEN_WIDTH + Math.abs(x * 2 * scaling), SCREEN_HEIGHT + Math.abs(y * 2 * scaling), xOffset, yOffset, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -137,12 +132,8 @@
 		camera.position.y = fixedY + (y * scaling );
 		camera.position.z = fixedZ + (z * scaling );
 		
-		// update lookAt?
-		// camera.lookAt(newLookat);
-
 		// when changing height of window, we need to change field of view
 		camera.fov = Math.atan((SCREEN_HEIGHT/2 + Math.abs(y * scaling ))/(Math.abs(z*scaling)))*360/Math.PI;
-		//debugger;
 		
 		// camera.updateMatrixWorld(); // not sure about this.
 		camera.updateProjectionMatrix();
@@ -155,10 +146,7 @@
 		z: 55,
 		fixedX: 0,
 		fixedY: 0,
-		fixedZ: 0,
-		lookX: 0,
-		lookY: 0,
-		lookZ: 0
+		fixedZ: 0
 	};
 
 	var f1 = gui.addFolder('Perspective');
@@ -168,9 +156,6 @@
 	f1.add(perspectiveParams, 'fixedX', 0, 200).step(1).onChange(onParamsChange);
 	f1.add(perspectiveParams, 'fixedY', 0, 200).step(1).onChange(onParamsChange);
 	f1.add(perspectiveParams, 'fixedZ', 0, 200).step(1).onChange(onParamsChange);
-	f1.add(perspectiveParams, 'lookX', -200, 200).step(1).onChange(onParamsChange);
-	f1.add(perspectiveParams, 'lookY', -200, 200).step(1).onChange(onParamsChange);
-	f1.add(perspectiveParams, 'lookZ', -200, 200).step(1).onChange(onParamsChange);
 
 	f1.open();
 
